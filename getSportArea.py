@@ -43,7 +43,7 @@ def imgGradent(test_1,test_2,p):
     # grad = measure.label(grad, background=0, connectivity=1)
     # grad = morphology.remove_small_objects(grad,min_size=256,connectivity=1)
 
-    # grad = largestConnectComponent(grad)
+    grad = largestConnectComponent(grad)
 
     grad = np.asarray(grad).astype('uint8')
     grad = np.expand_dims(grad, axis=2)
@@ -56,12 +56,12 @@ def imgGradent(test_1,test_2,p):
         # 获取矩形框边界坐标
         x, y, w, h = cv2.boundingRect(c)
         # 计算矩形框的面积
-        # area = cv2.contourArea(c)
-        # count += 1
-        # if 20 < area < 1000000:
-        #     cv2.rectangle(test_2, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        area = cv2.contourArea(c)
+        count += 1
+        if 20 < area < 1000000:
+            cv2.rectangle(grad, (x, y), (x + w, y + h), (0, 255, 0), 2)
     print(time.time() - start)
-    cv2.imshow("img", test_2)
+    cv2.imshow("img", grad)
     print(time.time() - start)
     # cv2.imwrite('./img.png',img=grad)
     cv2.waitKey(0)
@@ -103,7 +103,7 @@ def largestConnectComponent(bw_img, ):
 
 if __name__ == '__main__':
     start = time.time()
-    lastframe = cv2.imread('../test_data/2.png')
-    frame = cv2.imread('../test_data/3.png')
-    imgGradent(lastframe, frame, 0.9)
+    lastframe = cv2.imread('test_data/135.jpg')
+    frame = cv2.imread('test_data/136.jpg')
+    imgGradent(lastframe, frame, 0.35)
     print(time.time()-start)
