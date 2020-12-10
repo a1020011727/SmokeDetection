@@ -12,6 +12,10 @@ from skimage.measure import regionprops
 import matplotlib.patches as mpatches
 import torch
 
+from tools.getBbox import draw_anchor
+from tools.iouCal import bbox_iou
+
+
 def example2d(test_1,test_2,p):
     # t1 = Image.open('test_data/2.png')
     # t1 = t1.resize((1280,720),Image.NONE)
@@ -37,11 +41,12 @@ def example2d(test_1,test_2,p):
     gray_image2d2 = test_image2
 
     # grad_x1 = correlate2d(gray_image2d1, Laplace, mode='same')  # 计算梯度
-    grad_y1 = correlate2d(gray_image2d1, np.transpose(Laplace), mode='same')
+    # grad_y1 = correlate2d(gray_image2d1, np.transpose(Laplace), mode='same')
+    grad_y1 =  cv2.Sobel(test_image1, cv2.CV_64F,0,1,ksize=5)
 
     # grad_x2 = correlate2d(gray_image2d2, Laplace, mode='same')
-    grad_y2 = correlate2d(gray_image2d2, np.transpose(Laplace), mode='same')
-
+    # grad_y2 = correlate2d(gray_image2d2, np.transpose(Laplace), mode='same')
+    grad_y2 = cv2.Sobel(test_image2, cv2.CV_64F, 0, 1, ksize=5)
     # print(time.time() - start1)
 
     test_image2 = test_2
@@ -53,11 +58,11 @@ def example2d(test_1,test_2,p):
     grad = np.asarray((grad_y1-grad_y2))
 
     grad = np.where((abs(grad)> p), 1, 0).astype('uint8')
-    grad = cv2.medianBlur(grad, 3)
-    grad = cv2.medianBlur(grad, 3)
-    grad = cv2.medianBlur(grad, 3)
-    grad = cv2.medianBlur(grad, 3)
-    grad = cv2.medianBlur(grad, 3)
+    # grad = cv2.medianBlur(grad, 3)
+    # grad = cv2.medianBlur(grad, 3)
+    # grad = cv2.medianBlur(grad, 3)
+    # grad = cv2.medianBlur(grad, 3)
+    # grad = cv2.medianBlur(grad, 3)
 
     # _, binary = cv2.threshold(grad, 0.1, 1, cv2.THRESH_BINARY)
     # threshold = h / 50 * w / 50
@@ -83,7 +88,7 @@ def example2d(test_1,test_2,p):
         # 计算矩形框的面积
         area = cv2.contourArea(c)
         count += 1
-        if 20 < area < 10000000:
+        if 200 < area < 10000000:
             cv2.rectangle(grad, (x, y), (x + w, y + h), (0, 255, 0), 2)
     # print(count)
     # print(time.time() - start)
@@ -159,26 +164,38 @@ if __name__ == '__main__':
     #     if cv2.waitKey(200) & 0xFF == ord('q'):
     #         break
 '''
-    lastframe = cv2.imread('../test_data/2.png')
-    frame = cv2.imread('../test_data/3.png')
-    import draw_anchor
-    import bbox_iou
+    lastframe = cv2.imread('../test_data/135.jpg')
+    lastframe = cv2.GaussianBlur(lastframe,(3,3),0)
+    lastframe = cv2.medianBlur(lastframe,3)
+    frame = cv2.imread('../test_data/136.jpg')
+    frame = cv2.GaussianBlur(frame,(3,3),0)
+    frame = cv2.medianBlur(frame,3)
+
     n = draw_anchor()
     n = torch.Tensor([n]).cuda(0)
     first_iou = None
     i =0
-    p=0.1
+    p=0.001
+    p1=0
+    iou1 = 0
     b = torch.Tensor([example2d(lastframe, frame, 0.15)]).cuda(0)
     first_iou = bbox_iou(b, n)
     while True:
         b = torch.Tensor([example2d(lastframe, frame, p)]).cuda(0)
-        iou = bbox_iou(b, n)
-        if iou >= 0.75:
-            break
-        p = p - 0.001
 
-        print(iou)
-        print(p)
+        iou = bbox_iou(b, n)
+
+        if iou >iou1:
+
+            p1 = p
+            iou1 = iou
+            if iou >= 0.7:
+                break
+        else:
+            p = p + 0.001
+            print(iou)
+            print(p1)
+            print(p)
 
 
 

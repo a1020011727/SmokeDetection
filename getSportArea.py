@@ -32,14 +32,14 @@ def imgGradent(test_1,test_2,p):
     print(time.time() - start)
     grad = cv2.medianBlur(grad, 3)
     print(time.time() - start)
-    _, binary = cv2.threshold(grad, 0, 1, cv2.THRESH_BINARY)
-    threshold = 200*200
-    contours, hierarch = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
-    for i in range(len(contours)):
-        area = cv2.contourArea(contours[i])  # 计算轮廓所占面积
-        if area < threshold:  # 将area小于阈值区域填充背景色，由于OpenCV读出的是BGR值
-            cv2.drawContours(grad, [contours[i]], 0, 0, thickness=-1)  # 原始图片背景BGR值(84,1,68)
-            continue
+    # _, binary = cv2.threshold(grad, 0, 1, cv2.THRESH_BINARY)
+    # threshold = 10*10
+    # contours, hierarch = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    # for i in range(len(contours)):
+    #     area = cv2.contourArea(contours[i])  # 计算轮廓所占面积
+    #     if area < threshold:  # 将area小于阈值区域填充背景色，由于OpenCV读出的是BGR值
+    #         cv2.drawContours(grad, [contours[i]], 0, 0, thickness=-1)  # 原始图片背景BGR值(84,1,68)
+    #         continue
     # grad = measure.label(grad, background=0, connectivity=1)
     # grad = morphology.remove_small_objects(grad,min_size=256,connectivity=1)
 
@@ -58,10 +58,11 @@ def imgGradent(test_1,test_2,p):
         # 计算矩形框的面积
         area = cv2.contourArea(c)
         count += 1
-        if 20 < area < 1000000:
+        if 2000 < area < 1000000:
             cv2.rectangle(grad, (x, y), (x + w, y + h), (0, 255, 0), 2)
     print(time.time() - start)
     cv2.imshow("img", grad)
+    cv2.imwrite('directsub.jpg', grad)
     print(time.time() - start)
     # cv2.imwrite('./img.png',img=grad)
     cv2.waitKey(0)
@@ -104,6 +105,10 @@ def largestConnectComponent(bw_img, ):
 if __name__ == '__main__':
     start = time.time()
     lastframe = cv2.imread('test_data/135.jpg')
+    lastframe = cv2.GaussianBlur(lastframe,(3,3),0)
+    lastframe = cv2.medianBlur(lastframe,3)
     frame = cv2.imread('test_data/136.jpg')
-    imgGradent(lastframe, frame, 0.35)
+    frame = cv2.GaussianBlur(frame,(3,3),0)
+    frame = cv2.medianBlur(frame,3)
+    imgGradent(lastframe, frame, 0.4130000000000003)
     print(time.time()-start)

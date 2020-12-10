@@ -3,8 +3,8 @@ import xml.dom.minidom
 import cv2 as cv
 
 def draw_anchor():
-        imgfile = '../test_data/3.png'
-        xmlfile = '../test_data/3.xml'
+        imgfile = '../test_data/136.jpg'
+        xmlfile = '../test_data/136.xml'
         # print(image)
         # 打开xml文档
         DOMTree = xml.dom.minidom.parse(xmlfile)
